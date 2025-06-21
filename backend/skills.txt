@@ -1,0 +1,16 @@
+python
+flask
+react
+mongodb
+nlp
+machine learning
+data analysis
+java
+c++
+javascript
+aws
+docker
+kubernetes
+sql
+tensorflow
+pytorch
