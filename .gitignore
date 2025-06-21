@@ -1,0 +1,24 @@
+# Node modules
+node_modules/
+
+# Python virtual envs
+venv/
+venv310/
+spacy-env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS and cache files
+__pycache__/
+.DS_Store
+
+# Logs and temporary files
+*.log
+*.pyc
+*.pyo
+*.swp
+
+# Build outputs
+dist/
+build/
