@@ -1,5 +1,5 @@
 # app.py
-
+from utils.nlp_utils import process_resume,extract_skills,calculate_resume_score, extract_keywords, extract_entities, summarize_text
 from flask import Flask, request, jsonify
 from flask_cors import CORS 
 import os

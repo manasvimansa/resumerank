@@ -1,4 +1,5 @@
 import spacy
+import os
 from spacy.lang.en.stop_words import STOP_WORDS
 from string import punctuation
 from heapq import nlargest
@@ -6,7 +7,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load spaCy and skills.txt here
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("backend/skills.txt")
 
 with open("skills.txt") as f:
     skill_list = [line.strip().lower() for line in f.readlines()]
@@ -81,3 +82,32 @@ def calculate_resume_score(resume_text, job_text):
     ) else 0.0
 
     return (0.5 * skill_score) + (0.3 * experience_score) + (0.2 * education_score)
+import fitz  # PyMuPDF
+
+def extract_text_from_pdf(pdf_path):
+    """
+    Extracts text from a PDF file using PyMuPDF.
+    """
+    doc = fitz.open(pdf_path)
+    text = ""
+    for page in doc:
+        text += page.get_text()
+    return text
+
+def process_resume(resume_path, job_description):
+    """
+    Processes a PDF resume and matches skills based on the job description.
+    Returns:
+      - skills: list of extracted skills
+      - resume_text_preview: first 1000 characters of the resume
+    """
+    if not os.path.exists(resume_path):
+        return {"error": "File not found."}
+
+    resume_text = extract_text_from_pdf(resume_path)
+    skills_found = extract_skills(resume_text)
+
+    return {
+        "resume_text_preview": resume_text[:1000],
+        "skills": list(skills_found)
+    }
