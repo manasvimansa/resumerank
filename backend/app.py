@@ -85,27 +85,31 @@ def resume_score_route():
 
 # /upload Endpoint (PDF + Job Desc) ───────────────────────────────
 @app.route("/upload", methods=["POST"])
-def upload_resume():
-    if "resume" not in request.files or "job_description" not in request.form:
-        return jsonify({"error": "Missing 'resume' file or 'job_description'"}), 400
+def upload_multiple_resumes():
+    if "resumes" not in request.files or "job_description" not in request.form:
+        return jsonify({"error": "Missing resumes or job_description"}), 400
 
-    resume_file = request.files["resume"]
     job_description = request.form["job_description"]
+    files = request.files.getlist("resumes")
 
-    if resume_file.filename == "":
-        return jsonify({"error": "No file selected."}), 400
+    if not files:
+        return jsonify({"error": "No files uploaded."}), 400
 
-    saved_path = os.path.join(UPLOAD_FOLDER, resume_file.filename)
-    resume_file.save(saved_path)
+    results = []
+    for file in files:
+        saved_path = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(saved_path)
 
-    result = process_resume(saved_path, job_description)
+        result = process_resume(saved_path, job_description)
+        result["filename"] = file.filename
+        results.append(result)
 
-    try:
-        os.remove(saved_path)
-    except OSError:
-        pass
+        try:
+            os.remove(saved_path)
+        except OSError:
+            pass
 
-    return jsonify(result)
+    return jsonify({"ranked_resumes": results})
 
 #  Run the App ──────────────────────────────────────────────────────
 if __name__ == "__main__":

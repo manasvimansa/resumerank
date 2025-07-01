@@ -7,7 +7,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load spaCy and skills.txt here
-nlp = spacy.load("backend/skills.txt")
+nlp = spacy.load("en_core_web_sm")
 
 with open("skills.txt") as f:
     skill_list = [line.strip().lower() for line in f.readlines()]
@@ -111,3 +111,11 @@ def process_resume(resume_path, job_description):
         "resume_text_preview": resume_text[:1000],
         "skills": list(skills_found)
     }
+if __name__ == "__main__":
+    sample_text = "I have 3 years of experience with Python, machine learning, and NLP."
+
+    print("Extracted Skills:", extract_skills(sample_text))
+    print("Extracted Keywords:", extract_keywords(sample_text))
+    print("Extracted Entities:", extract_entities(sample_text))
+    print("Summary:", summarize_text(sample_text))
+    

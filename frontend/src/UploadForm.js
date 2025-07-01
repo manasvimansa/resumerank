@@ -10,10 +10,26 @@ function UploadForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const response = await uploadMultiple(jobDesc, Array.from(resumes));
-    setResults(response.sort((a, b) => b.skill_score - a.skill_score));
-    setLoading(false);
-  };
+
+    const formData = new FormData();
+    formData.append("job_description", jobDesc);
+    Array.from(resumes).forEach(file => formData.append("resumes", file));
+
+    try {
+        const response = await axios.post("http://localhost:5000/upload", formData, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
+
+        console.log(response.data);
+        setResults(response.data.ranked_resumes);  // Adjust based on backend response
+    } catch (err) {
+        console.error(err);
+        alert("Error uploading resumes.");
+    } finally {
+        setLoading(false);
+    }
+};
+
 
   return (
     <div className="upload-section">
