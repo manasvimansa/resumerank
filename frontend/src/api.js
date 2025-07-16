@@ -1,27 +1,18 @@
-// File: frontend/src/api.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000';
-
-export const uploadResumes = async (jobDescription, resumes) => {
-  const formData = new FormData();
-  formData.append('job_description', jobDescription);
-  resumes.forEach((file) => {
-    formData.append('resume', file); // Only handles one file, see note below
-  });
-  return axios.post(`${API_BASE_URL}/upload`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-};
+const API_BASE_URL = 'http://127.0.0.1:5000';  // Ensure this matches your backend
 
 export const uploadMultiple = async (jobDescription, resumeFiles) => {
-  const uploadPromises = resumeFiles.map(async (file) => {
-    const formData = new FormData();
-    formData.append('job_description', jobDescription);
-    formData.append('resume', file);
-    return axios.post(`${API_BASE_URL}/upload`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }).then(res => ({ filename: file.name, ...res.data }));
+  const formData = new FormData();
+  formData.append('job_description', jobDescription);
+
+  resumeFiles.forEach((file) => {
+    formData.append('resumes', file);  // <-- this must match Flask expecting "resumes"
   });
-  return Promise.all(uploadPromises);
+
+  const response = await axios.post('http://127.0.0.1:5000/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+  return response.data.ranked_resumes;
 };

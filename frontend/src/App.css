@@ -1,3 +1,4 @@
+/* Global Styles */
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -5,18 +6,24 @@ body {
   color: white;
 }
 
+html, body {
+  height: 100%;
+}
+
+/* Container */
 .hero-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
+/* Navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: #041e2c;
+  background-color: rgba(4, 30, 44, 0.9);
 }
 
 .navbar .logo {
@@ -30,12 +37,12 @@ body {
   text-decoration: none;
 }
 
+/* Hero Section */
 .hero-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   text-align: center;
   padding: 2rem;
 }
@@ -51,10 +58,20 @@ body {
   margin-bottom: 2rem;
 }
 
+/* Input Section */
 .cta-container {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   margin-bottom: 3rem;
+  justify-content: center;
+}
+
+.cta-container textarea {
+  padding: 0.75rem;
+  width: 300px;
+  border-radius: 5px;
+  border: none;
 }
 
 .cta-container input {
@@ -74,15 +91,76 @@ body {
   cursor: pointer;
 }
 
+/* Ranked Results */
+.results h2 {
+  margin-bottom: 20px;
+  font-size: 2rem;
+}
+
+/* Rank Item */
+.rank-item {
+  padding: 15px 25px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  min-width: 250px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 5px 0;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Top 3 Highlights Override */
+.rank-item.gold {
+  background: linear-gradient(to right, #FFD700, #FFFACD);
+  color: #000;
+}
+
+.rank-item.silver {
+  background: linear-gradient(to right, #C0C0C0, #E0E0E0);
+  color: #000;
+}
+
+.rank-item.bronze {
+  background: linear-gradient(to right, #CD7F32, #FFE4B5);
+  color: #000;
+}
+
+/* Ranked List Container */
+.ranked-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Chart Section */
+.chart-container {
+  width: 90%;
+  max-width: 800px;
+  margin: 40px auto;
+}
+
+.recharts-wrapper text {
+  fill: white;
+}
+
+/* Info Cards */
 .image-grid {
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
   justify-content: center;
+  margin-top: 30px;
 }
 
 .card {
-  background-color: #093c51;
+  background-color: rgba(9, 60, 81, 0.9);
   padding: 1.5rem;
   border-radius: 15px;
   text-align: center;
@@ -96,4 +174,5 @@ body {
 
 .card p {
   margin: 0;
+  color: white;
 }

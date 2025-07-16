@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import './App.css';
+import { uploadMultiple } from './api';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer
+} from 'recharts';
 
 function App() {
   const [jobDesc, setJobDesc] = useState('');
@@ -13,21 +22,26 @@ function App() {
     if (!jobDesc || resumes.length === 0) return;
     setLoading(true);
 
-    const uploadPromises = Array.from(resumes).map(async (file) => {
-      const formData = new FormData();
-      formData.append('job_description', jobDesc);
-      formData.append('resume', file);
+    try {
+      const rankedResumes = await uploadMultiple(jobDesc, Array.from(resumes));
+      setResults(rankedResumes.sort((a, b) => b.skill_score - a.skill_score));
+    } catch (err) {
+      console.error(err);
+      alert("Error uploading resumes.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      const res = await axios.post('http://localhost:5000/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+  const getRankClass = (index) => {
+    if (index === 0) return "gold";
+    if (index === 1) return "silver";
+    if (index === 2) return "bronze";
+    return "";
+  };
 
-      return { filename: file.name, ...res.data };
-    });
-
-    const ranked = await Promise.all(uploadPromises);
-    setResults(ranked.sort((a, b) => b.skill_score - a.skill_score));
-    setLoading(false);
+  const cleanFilename = (filename) => {
+    return filename.replace(/\.pdf$/i, '');
   };
 
   return (
@@ -67,19 +81,44 @@ function App() {
           </button>
         </form>
 
+        {/* RANKED RESUMES */}
         {results.length > 0 && (
           <div className="results">
             <h2>Ranked Resumes</h2>
-            <ul>
+            <ul className="ranked-list">
               {results.map((res, index) => (
-                <li key={index}>
-                  <strong>{res.filename}</strong> - {res.skill_score * 100}%
+                <li key={index} className={`rank-item ${getRankClass(index)}`}>
+                  <span className="rank-number">{index + 1}.</span>
+                  <strong>{cleanFilename(res.filename)}</strong> - {(res.skill_score * 100).toFixed(0)}%
                 </li>
               ))}
             </ul>
           </div>
         )}
 
+        {/* CHART */}
+        {results.length > 0 && (
+          <div className="chart-container" style={{ width: "90%", maxWidth: "800px", margin: "0 auto" }}>
+            <h2>Skill Score Comparison</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={results}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey={(entry) => cleanFilename(entry.filename)}
+                  angle={-25}
+                  textAnchor="end"
+                  interval={0}
+                  height={60}
+                />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="skill_score" fill="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* CARDS */}
         <div className="image-grid">
           <div className="card">
             <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" alt="AI Icon" />

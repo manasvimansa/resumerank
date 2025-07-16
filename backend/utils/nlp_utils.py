@@ -37,6 +37,14 @@ def extract_entities(text):
     doc = nlp(text)
     return [(ent.text, ent.label_) for ent in doc.ents]
 
+def extract_name(text):
+    doc = nlp(text)
+    for ent in doc.ents:
+        if ent.label_ == "PERSON":
+            return ent.text
+    return "Unknown"
+
+
 def summarize_text(text, n=3):
     doc = nlp(text)
     word_freq = {}
@@ -69,19 +77,40 @@ def get_similarity_score(text1, text2):
     return cosine_similarity(vectors[0], vectors[1])[0][0]
 
 def calculate_resume_score(resume_text, job_text):
-    resume_keywords = extract_top_n_keywords(resume_text)
-    job_keywords = extract_top_n_keywords(job_text)
-    skill_score = len(resume_keywords & job_keywords) / len(job_keywords) if job_keywords else 0.0
+    resume_skills = extract_skills(resume_text)
+    job_skills = extract_skills(job_text)
+
+    if not job_skills:
+        skill_score = 0.0
+    else:
+        skill_score = len(resume_skills & job_skills) / len(job_skills)
+
+    similarity_score = get_similarity_score(resume_text, job_text)
 
     experience_score = 1.0 if any(
-        phrase in resume_text.lower() for phrase in ["2 years", "3 years", "experience"]
+        phrase in resume_text.lower() for phrase in ["2 years", "3 years", "experience", "work history", "employed at"]
     ) else 0.5
 
     education_score = 1.0 if any(
-        phrase in resume_text.lower() for phrase in ["b.tech", "bachelor", "graduation"]
+        phrase in resume_text.lower() for phrase in ["b.tech", "bachelor", "graduation", "degree", "bachelor of technology"]
     ) else 0.0
 
-    return (0.5 * skill_score) + (0.3 * experience_score) + (0.2 * education_score)
+    return (0.5 * skill_score) + (0.2 * similarity_score) + (0.2 * experience_score) + (0.1 * education_score)
+
+def process_resume(resume_path, job_description):
+    if not os.path.exists(resume_path):
+        return {"error": "File not found."}
+
+    resume_text = extract_text_from_pdf(resume_path)
+    skills_found = extract_skills(resume_text)
+    name = extract_name(resume_text)
+
+    return {
+        "resume_text_preview": resume_text[:1000],
+        "skills": list(skills_found),
+        "name": name
+    }
+
 import fitz  # PyMuPDF
 
 def extract_text_from_pdf(pdf_path):
@@ -94,28 +123,9 @@ def extract_text_from_pdf(pdf_path):
         text += page.get_text()
     return text
 
-def process_resume(resume_path, job_description):
-    """
-    Processes a PDF resume and matches skills based on the job description.
-    Returns:
-      - skills: list of extracted skills
-      - resume_text_preview: first 1000 characters of the resume
-    """
-    if not os.path.exists(resume_path):
-        return {"error": "File not found."}
 
-    resume_text = extract_text_from_pdf(resume_path)
-    skills_found = extract_skills(resume_text)
+def get_resume_score(resume_text, job_description):
+    score = calculate_resume_score(resume_text, job_description)
+    return round(score, 2)
 
-    return {
-        "resume_text_preview": resume_text[:1000],
-        "skills": list(skills_found)
-    }
-if __name__ == "__main__":
-    sample_text = "I have 3 years of experience with Python, machine learning, and NLP."
 
-    print("Extracted Skills:", extract_skills(sample_text))
-    print("Extracted Keywords:", extract_keywords(sample_text))
-    print("Extracted Entities:", extract_entities(sample_text))
-    print("Summary:", summarize_text(sample_text))
-    

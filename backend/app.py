@@ -1,13 +1,22 @@
 # app.py
-from utils.nlp_utils import process_resume,extract_skills,calculate_resume_score, extract_keywords, extract_entities, summarize_text
+from utils.nlp_utils import (
+    process_resume,
+    extract_skills,
+    calculate_resume_score,
+    extract_keywords,
+    extract_entities,
+    summarize_text,
+    extract_text_from_pdf,
+    get_resume_score
+)
+extract_entities, summarize_text
 from flask import Flask, request, jsonify
 from flask_cors import CORS 
 import os
-app = Flask(__name__)
-CORS(app)
 
-# Basic Setup ──────────────────────────────────────────────────────
 app = Flask(__name__)
+CORS(app)  # <-- Apply CORS after defining 'app'
+
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -101,7 +110,13 @@ def upload_multiple_resumes():
         file.save(saved_path)
 
         result = process_resume(saved_path, job_description)
+
+        # Extract full resume text to compute score
+        resume_text = extract_text_from_pdf(saved_path)
+        score = get_resume_score(resume_text, job_description)
+
         result["filename"] = file.filename
+        result["skill_score"] = score
         results.append(result)
 
         try:
@@ -111,6 +126,8 @@ def upload_multiple_resumes():
 
     return jsonify({"ranked_resumes": results})
 
+
 #  Run the App ──────────────────────────────────────────────────────
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
+
